@@ -1,0 +1,196 @@
+name: juga-stack
+
+include:
+  - ./DevEnvironment/docker-compose.yml
+
+services:
+  admin-backend:
+    build:
+      context: ./AdminBackend
+    env_file:
+      - dev.env
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://0.0.0.0:5006
+      ConnectionStrings__Database: Server=postgres;Port=5432;Database=jugaai;User Id=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Include Error Detail=true
+      DataManager__Url: http://data-manager:18787
+      Minio__Host: minio:9000
+      Minio__AccessKey: ${MINIO_USER}
+      Minio__SecretKey: ${MINIO_SECRET}
+      Juga__Security__Jwt__Authority: http://keycloak:8080/realms/jugaai
+      Juga__Security__Jwt__RequireHttpsMetadata: "false"
+      Juga__Caching__Redis__ConnectionString: redis:6379,allowAdmin=true
+      Juga__Logging__LogToElasticSearchOptions__Uri: http://elasticsearch:9200
+      Juga__DataAudit__Elastic__Hosts: http://elasticsearch:9200
+      Juga__DataAudit__PostgreSql__ConnectionString: Server=postgres;Port=5432;Database=jugaai;User Id=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Include Error Detail=true
+    ports:
+      - "5006:5006"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      minio:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    networks:
+      - dev
+
+  tool-gateway:
+    build:
+      context: ./ToolGateway
+    env_file:
+      - dev.env
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      ASPNETCORE_URLS: http://0.0.0.0:5164
+      ConnectionStrings__Database: Server=postgres;Port=5432;Database=toolgateway;User Id=${POSTGRES_USER};Password=${POSTGRES_PASSWORD};Include Error Detail=true
+      Juga__Security__Jwt__Authority: http://keycloak:8080/realms/jugaai
+      Juga__Security__Jwt__RequireHttpsMetadata: "false"
+      Juga__Caching__Redis__ConnectionString: redis:6379,allowAdmin=true
+      Juga__Logging__LogToElasticSearchOptions__Uri: http://elasticsearch:9200
+    ports:
+      - "5164:5164"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    networks:
+      - dev
+
+  data-manager:
+    build:
+      context: ./DataManager
+    env_file:
+      - dev.env
+    environment:
+      APP_HOST: 0.0.0.0
+      APP_PORT: 18787
+      ADMIN_BACKEND_URL: http://admin-backend:5006
+      AUTH_ENABLED: "True"
+      AUTH_ISSUER: http://keycloak:8080/realms/jugaai
+      AUTH_AUDIENCE: datamanager
+      AUTH_CLIENT_SECRET: ${DATA_MANAGER_AUTH_CLIENT_SECRET}
+      TRUSTED_CERTIFICATE_PATH: ""
+      REDIS_URL: redis://redis:6379/2
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      DEFAULT_CACHE_EXPIRE_IN_MINUTE: 30
+      ENABLE_LOG_TO_ELASTIC: "true"
+      ES_HOST: http://elasticsearch:9200
+      ES_INDEX: ${DATA_MANAGER_ES_INDEX}
+      IS_S3_URL_SECURE: "False"
+      S3_URL: minio:9000
+      S3_ACCESS_KEY: ${MINIO_USER}
+      S3_SECRET_KEY: ${MINIO_SECRET}
+      S3_BUCKET_NAME: juga
+    ports:
+      - "18787:18787"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_started
+      redis:
+        condition: service_started
+    networks:
+      - dev
+
+  ai-orchestrator:
+    build:
+      context: ./AIOrchestrator
+    env_file:
+      - dev.env
+    environment:
+      ADMIN_BACKEND_URL: http://admin-backend:5006
+      APP_PORT_ADDRESS: 12000
+      AUTH_ENABLED: "True"
+      AUTH_ISSUER: http://keycloak:8080/realms/jugaai
+      AUTH_AUDIENCE: devui
+      TRUSTED_CERTIFICATE_PATH: ""
+      REDIS_URL: redis://redis:6379/1
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      DEFAULT_CACHE_EXPIRE_IN_MINUTE: 30
+      RAG_RETRIEVER_DEBUG_MODE: "False"
+      ENABLE_AGENT_OBSERVABILITY: "True"
+      LANGFUSE_ADDRESS: http://langfuse-web:3000
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+      ES_HOST: http://elasticsearch:9200
+      ES_INDEX: ${AI_ORCH_ES_INDEX}
+      MONGO_CONN_STRING: mongodb://root:example@mongo:27017/?authSource=admin
+      CHAT_DATABASE: chats
+      LITE_LLM_API_KEY: ${LITELLM_MASTER_KEY}
+    ports:
+      - "12000:12000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      mongo:
+        condition: service_started
+      admin-backend:
+        condition: service_started
+    networks:
+      - dev
+
+  alim:
+    build:
+      context: ./ALIM
+    env_file:
+      - dev.env
+    environment:
+      NEXTAUTH_URL: ${ALIM_NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${ALIM_NEXTAUTH_SECRET}
+      AUTH_KEYCLOAK_ID: ${ALIM_AUTH_KEYCLOAK_ID}
+      AUTH_KEYCLOAK_SECRET: ${ALIM_AUTH_KEYCLOAK_SECRET}
+      AUTH_KEYCLOAK_ISSUER: http://keycloak:8080/realms/jugaai
+      AUTH_URL: ${ALIM_NEXT_PUBLIC_AUTH_URL}
+      NEXT_PUBLIC_AUTH_KEYCLOAK_ID: ${ALIM_NEXT_PUBLIC_AUTH_KEYCLOAK_ID}
+      NEXT_PUBLIC_AUTH_KEYCLOAK_ISSUER: ${ALIM_NEXT_PUBLIC_AUTH_KEYCLOAK_ISSUER}
+      NEXT_PUBLIC_AUTH_URL: ${ALIM_NEXT_PUBLIC_AUTH_URL}
+      AI_ORCH_URL: http://ai-orchestrator:12000
+    ports:
+      - "3000:3000"
+    depends_on:
+      ai-orchestrator:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    networks:
+      - dev
+
+  juga-admin-ui:
+    build:
+      context: ./JUGA_ADMIN_UI
+    env_file:
+      - dev.env
+    environment:
+      NEXTAUTH_URL: ${JUGA_NEXTAUTH_URL}
+      NEXTAUTH_SECRET: ${JUGA_NEXTAUTH_SECRET}
+      AUTH_KEYCLOAK_ID: ${JUGA_AUTH_KEYCLOAK_ID}
+      AUTH_KEYCLOAK_SECRET: ${JUGA_AUTH_KEYCLOAK_SECRET}
+      AUTH_KEYCLOAK_ISSUER: http://keycloak:8080/realms/jugaai
+      AUTH_URL: ${JUGA_NEXT_PUBLIC_AUTH_URL}
+      NEXT_PUBLIC_AUTH_KEYCLOAK_ID: ${JUGA_NEXT_PUBLIC_AUTH_KEYCLOAK_ID}
+      NEXT_PUBLIC_AUTH_KEYCLOAK_ISSUER: ${JUGA_NEXT_PUBLIC_AUTH_KEYCLOAK_ISSUER}
+      NEXT_PUBLIC_AUTH_URL: ${JUGA_NEXT_PUBLIC_AUTH_URL}
+      LANGFUSE_BASE_URL: ${JUGA_LANGFUSE_BASE_URL}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY}
+      PORT: "3001"
+    ports:
+      - "3001:3001"
+    depends_on:
+      langfuse-web:
+        condition: service_started
+      keycloak:
+        condition: service_started
+    networks:
+      - dev
+
+
