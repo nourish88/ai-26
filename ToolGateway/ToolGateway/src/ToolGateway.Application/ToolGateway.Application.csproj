@@ -1,0 +1,21 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Framework\Juga.Abstractions\Juga.Abstractions.csproj" />
+    <ProjectReference Include="..\Framework\Juga.CQRS\Juga.CQRS.csproj" />
+    <ProjectReference Include="..\Framework\Juga.CrossCuttingConcerns\Juga.CrossCuttingConcerns.csproj" />
+    <ProjectReference Include="..\Framework\Juga.Data\Juga.Data.csproj" />
+    <ProjectReference Include="..\ToolGateway.Domain\ToolGateway.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ModelContextProtocol.AspNetCore" Version="0.3.0-preview.3" />
+  </ItemGroup>
+
+</Project>

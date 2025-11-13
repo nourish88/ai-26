@@ -1,0 +1,14 @@
+/.idea/
+!/data/clickhouse/data/
+/data/clickhouse/data/*
+!/data/clickhouse/logs/
+/data/clickhouse/logs/*
+!/data/clickhouse/tmp/
+/data/clickhouse/tmp/*
+!/data/postgres/data/
+/data/postgres/data/*
+!/data/minio/
+/data/minio/*
+!/data/mongo/
+/data/mongo/*
+.env

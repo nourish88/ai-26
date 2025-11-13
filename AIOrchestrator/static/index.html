@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Chat Interface</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/keycloak-js@25.0.6/dist/keycloak.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Custom scrollbars for light theme */
+        #chat-container::-webkit-scrollbar,
+        #conversation-list::-webkit-scrollbar {
+            width: 6px;
+        }
+        #chat-container::-webkit-scrollbar-track,
+        #conversation-list::-webkit-scrollbar-track {
+            background: #e5e7eb; /* bg-gray-200 */
+        }
+        #chat-container::-webkit-scrollbar-thumb,
+        #conversation-list::-webkit-scrollbar-thumb {
+            background: #9ca3af; /* bg-gray-400 */
+            border-radius: 3px;
+        }
+        #chat-container::-webkit-scrollbar-thumb:hover,
+        #conversation-list::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* bg-gray-500 */
+        }
+        .message-bubble {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: slide-in 0.3s forwards;
+        }
+        @keyframes slide-in {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .conversation-item.active {
+            background-color: #d1d5db; /* bg-gray-300 */
+        }
+        .like-btn, .dislike-btn {
+            transition: all 0.2s ease-in-out;
+            cursor: pointer;
+        }
+        .like-btn.liked {
+            color: #ef4444; /* red-500 */
+            transform: scale(1.1);
+        }
+        .dislike-btn.disliked {
+            color: #ef4444; /* red-500 */
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-900 flex h-screen p-4 space-x-4">
+
+    <!-- Left Sidebar for Conversation History -->
+    <div class="w-1/4 h-full flex flex-col bg-white rounded-2xl shadow-lg border border-gray-200">
+        <div class="p-4 border-b border-gray-200">
+            <button id="new-chat-btn" class="w-full bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition duration-200 shadow-md">
+                + New Chat
+            </button>
+        </div>
+        <div id="conversation-list" class="flex-1 p-2 overflow-y-auto">
+            <!-- Conversation items will be dynamically inserted here -->
+        </div>
+    </div>
+
+    <!-- Right Main Chat Area -->
+    <div class="w-3/4 h-full flex flex-col bg-white rounded-2xl shadow-2xl border border-gray-200">
+        <!-- Header -->
+        <div class="p-4 border-b border-gray-200 flex items-center justify-between">
+            <h1 id="chat-title" class="text-xl font-bold text-gray-800">AI Chat</h1>
+            <div class="flex items-center space-x-2">
+                <input type="text" id="documents-input" placeholder="File Identifiers" class="flex-1 bg-gray-100 border border-gray-300 rounded-lg py-3 px-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-400 transition duration-200" />
+                <input type="text" id="app-identifier-input" placeholder="App Identifier" class="flex-1 bg-gray-100 border border-gray-300 rounded-lg py-3 px-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-400 transition duration-200" />
+                <label for="streaming-toggle" class="text-sm font-medium text-gray-600">Streaming</label>
+                <input type="checkbox" id="streaming-toggle" class="form-checkbox h-5 w-5 text-red-500 bg-gray-300 border-gray-400 rounded focus:ring-red-400">
+            </div>
+        </div>
+
+        <!-- Chat Container -->
+        <div id="chat-container" class="flex-1 p-6 overflow-y-auto bg-gray-50">
+            <!-- Initial welcome message -->
+            <div class="flex justify-start mb-4 message-bubble">
+                <div class="bg-gray-300 rounded-lg px-4 py-2 max-w-lg shadow-sm">
+                    <p class="text-gray-800">Hello! Select a past conversation or start a new one.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="p-4 border-t border-gray-200 bg-white">
+            <form id="chat-form" class="flex items-center space-x-4">
+                <input type="text" id="message-input" placeholder="Type your message here..." class="flex-1 bg-gray-100 border border-gray-300 rounded-lg py-3 px-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-red-400 transition duration-200" autocomplete="off">
+                <button type="submit" id="send-button" class="bg-red-500 hover:bg-red-600 text-white font-semibold py-3 px-5 rounded-lg transition duration-200 flex items-center shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-send"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Custom Delete Confirmation Modal -->
+    <div id="delete-modal" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center hidden">
+        <div class="bg-white rounded-lg p-6 shadow-xl w-96">
+            <h2 class="text-xl font-semibold text-gray-900 mb-4">Confirm Deletion</h2>
+            <p class="text-gray-700 mb-6">Are you sure you want to delete this chat? This action cannot be undone.</p>
+            <div class="flex justify-end space-x-4">
+                <button id="cancel-delete-btn" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg text-gray-800 font-medium">Cancel</button>
+                <button id="confirm-delete-btn" class="px-4 py-2 bg-red-500 hover:bg-red-600 rounded-lg text-white font-medium">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            //AUTH
+            let accessToken = ""
+            const keycloak = new Keycloak({
+                url: 'http://localhost:8080',
+                realm: 'jugaai',
+                clientId: 'devui'
+            });
+            
+            
+            keycloak.init({ 
+                onLoad: 'check-sso' 
+            }).then(function(authenticated) {
+                if(!authenticated){
+                    keycloak.login();
+                }
+                else{
+                    accessToken = "Bearer " + keycloak.token
+                    // --- INITIALIZATION ---
+                    loadConversations();
+                    startNewChat();
+                }
+            }).catch(function() {
+                console.log('Failed to initialize keycloak');
+            });
+
+            // --- DOM ELEMENTS ---
+            const chatContainer = document.getElementById('chat-container');
+            const chatForm = document.getElementById('chat-form');
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            const streamingToggle = document.getElementById('streaming-toggle');
+            const conversationList = document.getElementById('conversation-list');
+            const newChatBtn = document.getElementById('new-chat-btn');
+            const chatTitle = document.getElementById('chat-title');
+            const deleteModal = document.getElementById('delete-modal');
+            const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
+            const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
+
+            // --- API CONFIGURATION ---
+            const API_BASE_URL = '';
+            // The API endpoints from our Python FastAPI code
+            const CHAT_HISTORY_URL = `${API_BASE_URL}/chat_history`;
+            const CHAT_HISTORY_DETAIL_URL = `${API_BASE_URL}/chat_history_detail`;
+            const LIKE_MESSAGE_URL = `${API_BASE_URL}/like_message`;
+            const REPORT_MESSAGE_URL = `${API_BASE_URL}/report_message`;
+            const DELETE_CHAT_URL = `${API_BASE_URL}/chat_history_detail`;
+            
+            // NOTE: These endpoints for new messages were not provided, so they are
+            // placeholders for a complete system.
+            const BLOCKING_API_URL = `${API_BASE_URL}/chat/blocking`;
+            const STREAMING_API_URL = `${API_BASE_URL}/chat/streaming`;
+
+            // --- STATE ---
+            let currentThreadId = null;
+            let threadToDelete = null;
+            const userId = 'user_234' ; //Math.random().toString(36).substr(2, 9);
+            const APP_ID = '1';
+            let APP_IDENTIFIER = ''; // will be set from input
+            let DOCUMENTS=null;
+
+            
+
+            // --- EVENT LISTENERS ---
+            newChatBtn.addEventListener('click', startNewChat);
+
+            chatForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                APP_IDENTIFIER = document.getElementById('app-identifier-input').value;
+                let docs = document.getElementById('documents-input').value;
+                if(docs){
+                    DOCUMENTS = docs.split(/\s*,\s*/).filter(Boolean);
+                }
+                const query = messageInput.value.trim();
+                if (!query) return;
+
+                addMessage('user', query, null, null, null, new Date().toISOString());
+                messageInput.value = '';
+
+                if (streamingToggle.checked) {
+                    handleStreamingResponse(query);
+                } else {
+                    handleBlockingResponse(query);
+                }
+            });
+
+            // Modal event listeners
+            cancelDeleteBtn.addEventListener('click', () => {
+                deleteModal.classList.add('hidden');
+                threadToDelete = null;
+            });
+            
+            confirmDeleteBtn.addEventListener('click', () => {
+                if (threadToDelete) {
+                    performDelete(threadToDelete);
+                }
+                deleteModal.classList.add('hidden');
+            });
+            sendButton.disabled = false;
+
+            // --- FUNCTIONS ---
+
+            /**
+             * Fetches and displays the list of past conversations by grouping
+             * messages by their thread_id.
+             */
+            async function loadConversations() {
+                try {
+                    const url = `${CHAT_HISTORY_URL}`;
+                    const response = await fetch(url,{headers: {    'app-identifier': APP_IDENTIFIER, 'Authorization':accessToken  }});
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const messages = await response.json();
+                    
+                    // Group messages by thread_id to form a list of conversations
+                    const conversationsMap = new Map();
+                    messages.forEach(msg => {
+                        if (msg.thread_id && !conversationsMap.has(msg.thread_id)) {
+                            // Use the first query as the conversation title
+                            conversationsMap.set(msg.thread_id, {
+                                title: msg.query || 'Untitled Chat',
+                                thread_id: msg.thread_id
+                            });
+                        }
+                    });
+
+                    const conversations = Array.from(conversationsMap.values());
+                    
+                    conversationList.innerHTML = ''; // Clear existing list
+                    conversations.forEach(conv => {
+                        const item = document.createElement('div');
+                        item.classList.add('conversation-item', 'group', 'p-3', 'rounded-lg', 'cursor-pointer', 'hover:bg-gray-300', 'flex', 'justify-between', 'items-center', 'transition', 'duration-200');
+                        item.dataset.threadId = conv.thread_id;
+                        item.innerHTML = `
+                            <span class="truncate pr-2 text-gray-800">${conv.title}</span>
+                            <button class="delete-chat-btn text-gray-500 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-x-circle">
+                                    <circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>
+                                </svg>
+                            </button>
+                        `;
+                        item.querySelector('.delete-chat-btn').addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            showDeleteModal(conv.thread_id);
+                        });
+                        item.addEventListener('click', () => loadConversationMessages(conv.thread_id, conv.title));
+                        conversationList.appendChild(item);
+                    });
+                } catch (error) {
+                    console.error('Error loading conversations:', error);
+                    conversationList.innerHTML = '<p class="text-red-500 p-2">Could not load chats.</p>';
+                }
+            }
+
+            /**
+             * Fetches and renders messages for a specific conversation.
+             * @param {string} threadId - The ID of the conversation thread.
+             * @param {string} title - The title of the conversation.
+             */
+            async function loadConversationMessages(threadId, title) {
+                currentThreadId = threadId;
+                chatTitle.textContent = title;
+                chatContainer.innerHTML = '<p class="text-gray-500 text-center">Loading messages...</p>';
+                
+                // Highlight active conversation
+                document.querySelectorAll('.conversation-item').forEach(item => {
+                    item.classList.toggle('active', item.dataset.threadId === threadId);
+                });
+
+                try {
+                    const url = `${CHAT_HISTORY_DETAIL_URL}?thread_id=${threadId}`;
+                    const response = await fetch(url,{headers: {    'app-identifier': APP_IDENTIFIER, 'Authorization':accessToken }});
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const messages = await response.json();
+
+                    chatContainer.innerHTML = ''; // Clear loading message
+                    messages.forEach(msg => {
+                        if (msg.query) addMessage('user', msg.query, null, null, null, msg.query_time_stamp);
+                        if (msg.response) addMessage('ai', msg.response, msg.message_id, msg.is_liked, msg.is_disliked, msg.response_time_stamp);
+                    });
+                } catch (error) {
+                    console.error('Error loading messages:', error);
+                    chatContainer.innerHTML = '<p class="text-red-500 text-center">Could not load messages.</p>';
+                }
+            }
+            
+            /**
+             * Resets the UI for a new chat session.
+             */
+            function startNewChat() {
+                currentThreadId = null;
+                chatTitle.textContent = "New Chat";
+                chatContainer.innerHTML = '';
+                addMessage('ai', 'Hello! How can I assist you today? Ask me anything.');
+                document.querySelectorAll('.conversation-item').forEach(item => item.classList.remove('active'));
+            }
+
+            function addMessage(sender, text, messageId = null, isLiked = false, isDisliked = false, timestamp = null) {
+                const messageWrapper = document.createElement('div');
+                messageWrapper.classList.add('flex', 'mb-4', 'message-bubble');
+
+                const messageContent = document.createElement('div');
+                messageContent.classList.add('flex', 'flex-col', 'max-w-lg');
+                
+                const messageBubble = document.createElement('div');
+                messageBubble.classList.add('rounded-lg', 'px-4', 'py-2', 'shadow-sm', 'relative'); // Added relative for positioning
+
+                const messageText = document.createElement('p');
+                messageText.classList.add('text-gray-800', 'pr-12'); // Added padding to prevent text overlap
+                messageText.innerHTML = text;
+
+                const timestampText = document.createElement('div');
+                timestampText.classList.add('text-xs', 'text-gray-500', 'mt-1');
+                if (timestamp) {
+                    const date = new Date(timestamp);
+                    timestampText.textContent = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ' ' + date.toLocaleDateString();
+                }
+
+                if (sender === 'user') {
+                    messageWrapper.classList.add('justify-end');
+                    messageBubble.classList.add('bg-red-500', 'text-white');
+                    messageText.classList.remove('text-gray-800');
+                    messageText.classList.add('text-white');
+                    messageContent.classList.add('items-end');
+                } else {
+                    messageWrapper.classList.add('justify-start');
+                    messageBubble.classList.add('bg-gray-300');
+                    messageContent.classList.add('items-start');
+                }
+                
+                messageBubble.appendChild(messageText);
+
+                if (sender === 'ai' && messageId) {
+                    const actionContainer = document.createElement('div');
+                    // Positioned absolutely to the bottom right of the message bubble
+                    actionContainer.classList.add('absolute', 'bottom-1', 'right-2', 'flex', 'space-x-2', 'pt-1');
+                    
+                    // Like button
+                    const likeButton = document.createElement('button');
+                    likeButton.classList.add('like-btn', 'text-gray-500', 'hover:text-red-500');
+                    likeButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path></svg>`;
+                    if (isLiked) {
+                        likeButton.classList.add('liked');
+                        likeButton.setAttribute('fill', 'currentColor');
+                    }
+                    likeButton.onclick = () => likeMessage(messageId);
+                    
+                    // Dislike button
+                    const dislikeButton = document.createElement('button');
+                    dislikeButton.classList.add('dislike-btn', 'text-gray-500', 'hover:text-red-500');
+                    dislikeButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zM17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"></path></svg>`;
+                    if (isDisliked) {
+                        dislikeButton.classList.add('disliked');
+                        dislikeButton.setAttribute('fill', 'currentColor');
+                    }
+                    dislikeButton.onclick = () => reportMessage(messageId);
+                    
+                    actionContainer.appendChild(likeButton);
+                    actionContainer.appendChild(dislikeButton);
+                    messageBubble.appendChild(actionContainer);
+                }
+
+                messageContent.appendChild(messageBubble);
+                if (timestamp) {
+                    messageContent.appendChild(timestampText);
+                }
+                messageWrapper.appendChild(messageContent);
+                chatContainer.appendChild(messageWrapper);
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+                return messageBubble;
+            }
+            
+            async function likeMessage(messageId) {
+                try {
+                    const url = `${LIKE_MESSAGE_URL}?message_id=${messageId}&comment=Begendim`;
+                    const response = await fetch(url, { method: 'POST',headers: { 'app-identifier': APP_IDENTIFIER,'Authorization': accessToken } });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    console.log(`Message ${messageId} liked.`);
+                    loadConversationMessages(currentThreadId, chatTitle.textContent);
+                } catch (error) {
+                    console.error('Error liking message:', error);
+                }
+            }
+            
+            async function reportMessage(messageId) {
+                try {
+                    const url = `${REPORT_MESSAGE_URL}?message_id=${messageId}&comment=Beğenmedim`;
+                    const response = await fetch(url, { method: 'POST',headers: { 'app-identifier': APP_IDENTIFIER,'Authorization':accessToken } });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    console.log(`Message ${messageId} reported.`);
+                    loadConversationMessages(currentThreadId, chatTitle.textContent);
+                } catch (error) {
+                    console.error('Error reporting message:', error);
+                }
+            }
+            
+            function showDeleteModal(threadId) {
+                threadToDelete = threadId;
+                deleteModal.classList.remove('hidden');
+            }
+            
+            async function performDelete(threadId) {
+                try {
+                    const url = `${DELETE_CHAT_URL}?thread_id=${threadId}`;
+                    const response = await fetch(url, { method: 'DELETE',headers: { 'app-identifier': APP_IDENTIFIER,'Authorization': accessToken } });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    console.log(`Conversation ${threadId} deleted successfully.`);
+                    
+                    if (currentThreadId === threadId) {
+                        startNewChat();
+                    }
+                    loadConversations();
+                } catch (error) {
+                    console.error('Error deleting conversation:', error);
+                }
+            }
+            
+            async function handleBlockingResponse(query) {
+                const loadingBubble = addMessage('ai', '...');
+                loadingBubble.classList.add('animate-pulse');
+                sendButton.disabled = true;
+
+                const payload = {
+                    user_id: userId,
+                    query: query,
+                    context: {},
+                    app_id: APP_ID,
+                    fileIdentifiers:DOCUMENTS
+                };
+
+                if (currentThreadId) {
+                    payload.thread_id = currentThreadId;
+                }
+
+                try {
+                    const response = await fetch(BLOCKING_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'app-identifier': APP_IDENTIFIER,'Authorization':accessToken },
+                        body: JSON.stringify(payload),
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    
+                    const data = await response.json();
+                    loadingBubble.parentElement.remove();
+                    addMessage('ai', data.response || "Sorry, I couldn't get a response.", data.message_id, data.is_liked, data.is_disliked, data.response_time_stamp);
+                    
+                    if (!currentThreadId && data.thread_id) {
+                        currentThreadId = data.thread_id;
+                        loadConversations();
+                    }
+                } catch (error) {
+                    console.error('Error fetching blocking response:', error);
+                    loadingBubble.parentElement.remove();
+                    addMessage('ai', 'An error occurred. Please check the console.');
+                } finally {
+                    sendButton.disabled = false;
+                }
+            }
+            
+            async function handleStreamingResponse(query) {
+                console.log("Streaming")
+                sendButton.disabled = true;
+                const aiMessageBubble = addMessage('ai', '');
+                let fullResponse = '';
+                let newThreadIdFromStream = null;
+
+                const payload = {
+                    user_id: userId,
+                    query: query,
+                    context: {},
+                    app_id: APP_ID,
+                    fileIdentifiers:DOCUMENTS
+                };
+
+                if (currentThreadId) {
+                    payload.thread_id = currentThreadId;
+                }
+
+                try {
+
+                    const response = await fetch(STREAMING_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'text/event-stream','app-identifier': APP_IDENTIFIER,'Authorization':accessToken },
+                        body: JSON.stringify(payload),
+                    });
+                    if (!response.body) throw new Error("ReadableStream not available.");
+
+                    const reader = response.body.pipeThrough(new TextDecoderStream()).getReader();
+                    let buffer = [];
+                    let message = '';
+
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        
+                        
+                        if (done) {
+                            if(buffer.length>0){
+                                let lastMessage = buffer[buffer.length-1]
+                                try{
+                                    const parsed = JSON.parse(lastMessage);
+                                    if (parsed.thread_id) {
+                                            newThreadIdFromStream = parsed.thread_id;
+                                    }
+                                }
+                                catch (e) {
+                                        console.warn("Could not parse last message as JSON:", lastMessage);
+                                }
+                                
+                            }                            
+                            break;
+                        }
+                        else
+                        try{
+                            if (value.trim()){
+                                buffer.push(value);
+                                message+= JSON.parse(value).response
+                            }
+                        }
+                        catch(e){
+                            console.warn("Could not parse the: ",value)
+                        }
+                            
+                        /*
+                        let boundary = buffer.lastIndexOf('\n');
+                        if (boundary === -1) continue;
+
+                        let processData = buffer.substring(0, boundary);
+                        buffer = buffer.substring(boundary + 1);
+
+                        const lines = processData.split('\n').filter(line => line.trim() !== '');
+                        for (const line of lines) {
+                            try {
+                                const parsed = JSON.parse(line);
+                                if (parsed.message) {
+                                    console.log(parsed.message)
+                                    fullResponse += parsed.message;
+                                }
+                                if (parsed.thread_id) {
+                                    newThreadIdFromStream = parsed.thread_id;
+                                }
+                            } catch (e) {
+                                console.warn("Could not parse stream line as JSON:", line);
+                            }
+                        }*/
+                        aiMessageBubble.innerHTML = `<p>${message}</p>`;
+                        chatContainer.scrollTop = chatContainer.scrollHeight;
+                    }
+                    
+                    aiMessageBubble.innerHTML = `<p>${message}</p>`;
+                    
+                    if (!currentThreadId && newThreadIdFromStream) {
+                        currentThreadId = newThreadIdFromStream;
+                        loadConversations();
+                    }
+
+                } catch (error) {
+                    console.error('Error fetching streaming response:', error);
+                    aiMessageBubble.innerHTML = `<p>An error occurred during streaming.</p>`;
+                } finally {
+                    sendButton.disabled = false;
+                }
+            }
+        });
+    </script>
+</body>
+</html>

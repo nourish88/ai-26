@@ -1,0 +1,16 @@
+﻿-- Table: public.logs
+-- DROP TABLE IF EXISTS public.logs;
+--CREATE TABLE IF NOT EXISTS public.logs
+--(
+--    message text COLLATE pg_catalog."default",
+--    message_template text COLLATE pg_catalog."default", // bu satırı ekleme
+--    level character varying(50) COLLATE pg_catalog."default",
+--    "timestamp" timestamp with time zone,
+--    exception text COLLATE pg_catalog."default",
+--    properties jsonb
+--)
+--
+--TABLESPACE pg_default;
+--
+--ALTER TABLE IF EXISTS public.logs
+--    OWNER to root;

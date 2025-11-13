@@ -1,0 +1,17 @@
+﻿--CREATE TABLE public."AuditLogs"
+--(
+--    "Id" bigint NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 1 ),
+--    "EventTime" timestamp without time zone NOT NULL,
+--    "EventType" text NOT NULL,
+--    "Pk1" bigint,
+--    "Pk2" bigint,
+--	   "PkGuid" uuid,
+--    "Data" text,
+--    "Database" text,
+--    "Schema" text,
+--    "Table" text,
+--    "User" text,
+--    PRIMARY KEY ("Id")
+--);
+--ALTER TABLE IF EXISTS public."AuditLogs"
+--    OWNER to root;

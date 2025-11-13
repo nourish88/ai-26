@@ -1,0 +1,76 @@
+model_list:
+#LM_STUDIO
+  - model_name: lm_studio/text-embedding-qwen3-embedding-4b
+    litellm_params:
+      model: lm_studio/text-embedding-qwen3-embedding-4b
+      api_base: http://192.168.50.35:1234/v1
+#LOCAL OLLAMA
+  - model_name: "ollama/dengcao/Qwen3-Embedding-8B:Q8_0"             
+    litellm_params:
+      model: "ollama/dengcao/Qwen3-Embedding-8B:Q8_0"
+      api_base: "http://host.docker.internal:11434"
+  - model_name: "ollama/qwen3:14b"             
+    litellm_params:
+      model: "ollama/qwen3:14b"
+      api_base: "http://host.docker.internal:11434"
+
+  - model_name: "ollama/qwen3:30b"             
+    litellm_params:
+      model: "ollama/qwen3:30b"
+      api_base: "http://host.docker.internal:11434"
+
+  - model_name: "ollama/qwen3:32b"             
+    litellm_params:
+      model: "ollama/qwen3:32b"
+      api_base: "http://host.docker.internal:11434"
+
+  - model_name: "ollama/deepseek-r1:32b"             
+    litellm_params:
+      model: "ollama/deepseek-r1:32b"
+      api_base: "http://host.docker.internal:11434"
+
+  - model_name: "ollama/gpt-oss:20b"             
+    litellm_params:
+      model: "ollama/gpt-oss:20b"
+      api_base: "http://host.docker.internal:11434"
+#DOCKER_VLLM
+  - model_name: "hosted_vllm/Qwen/Qwen3-Embedding-4B"             
+    litellm_params:
+      model: "hosted_vllm/Qwen/Qwen3-Embedding-4B"
+      api_base: "http://vllm-embed-qwen3-4b:10001/v1"
+
+  - model_name: "hosted_vllm/Qwen/Qwen3-14B"             
+    litellm_params:
+      model: "hosted_vllm/Qwen/Qwen3-14B"
+      api_base: "http://vllm-qwen3-14b:10002/v1"
+
+  - model_name: "hosted_vllm/Qwen/Qwen3-14B-AWQ"             
+    litellm_params:
+      model: "hosted_vllm/Qwen/Qwen3-14B-AWQ"
+      api_base: "http://vllm-qwen3-14b-awq:10003/v1"
+#REMOTE_LITE_LLM
+  - model_name: "remote-litellm/qwen14b"             
+    litellm_params:
+      model: "litellm_proxy/qwen14b"
+      api_base: "http://api.jandarma.site"
+      api_key: "sk-fake"
+
+  - model_name: "remote-litellm/qwen3-32b-awq"             
+    litellm_params:
+      model: "litellm_proxy/qwen3-32b-awq"
+      api_base: "http://api.jandarma.site"
+      api_key: "sk-fake"
+
+  - model_name: "remote-litellm/qwen3-coder-30b"             
+    litellm_params:
+      model: "litellm_proxy/qwen3-coder-30b"
+      api_base: "http://api.jandarma.site"
+      api_key: "sk-fake"
+
+  - model_name: "remote-litellm/qwen3-embed-8b"             
+    litellm_params:
+      model: "litellm_proxy/qwen3-embed-8b"
+      api_base: "http://api.jandarma.site"
+      api_key: "sk-fake"
+litellm_settings:
+  success_callback: ["langfuse"]

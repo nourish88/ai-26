@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+	  <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="8.1.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="10.0.0" />
+    
+    <PackageReference Include="AspNetCore.HealthChecks.UI" Version="8.0.2" />
+  
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Juga.Abstractions\Juga.Abstractions.csproj" />
+    <ProjectReference Include="..\Juga.Client.SignalR\Juga.Client.SignalR.csproj" />
+    <ProjectReference Include="..\Juga.Client\Juga.Client.csproj" />
+    <ProjectReference Include="..\Juga.Logging.Serilog\Juga.Logging.Serilog.csproj" />
+  </ItemGroup>
+
+</Project>

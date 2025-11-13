@@ -1,0 +1,448 @@
+{
+	"info": {
+		"_postman_id": "b3bef216-5d00-4d04-a233-aca37bf5c518",
+		"name": "JugaAI",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4902477"
+	},
+	"item": [
+		{
+			"name": "AIOrchestrator",
+			"item": [
+				{
+					"name": "AIOrchestrator-GetApplications",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBRWtHLS1TdU1TSDE3QVlYMjJNSk5ZWU5TNElMend2b1k0YTlUWFp1dUpJIn0.eyJleHAiOjE3NTg3ODg2MDEsImlhdCI6MTc1ODc4NTAwMSwiYXV0aF90aW1lIjoxNzU4NzgyNjE4LCJqdGkiOiJvbnJ0YWM6NTI4MGEyOGEtN2E0ZC1hY2FlLTY1OGUtNmU2NGI1MzFlYWZjIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9qdWdhYWkiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiZWY2YTQzZmYtMmY4ZC00NjZlLTkyZmUtMDRhMmM1ZTBlYWI2IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGV2dWkiLCJzaWQiOiJjYjkzZGE2ZC00YmQyLTRmODktOTI5OC0zNmViNDFhZGRjM2QiLCJhY3IiOiIwIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly9sb2NhbGhvc3Q6MTIwMDAiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwiZGVmYXVsdC1yb2xlcy1qdWdhYWkiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJqdWdhIGFpIiwicHJlZmVycmVkX3VzZXJuYW1lIjoianVnYWFpIiwiZ2l2ZW5fbmFtZSI6Imp1Z2EiLCJmYW1pbHlfbmFtZSI6ImFpIiwiZW1haWwiOiJqdWdhYWlAanVnYWFpLmNvbSJ9.Nvw9UoKTaVEF04tR7jtDZ34K3pss4Up7mxPkFoViT9pzWZkTlKJhLcR_AQ9fW_5BVBHyL6Ddun3n_xWAqg3zP0C2hCTy0_hNqqUK-CARFRJJZVYdRhCWHNwGxO2M_glEfwoWJZSq7GvDmTNF_QS1Cf4G6Ufvu19eCD80Xc0eO44K0oXjirU-bKNGnm_lgiB60N4LhBI3mRMcdYtFTf_TpNJc3Qn20rqtYpkHY_DnK7hmSymRl8JR3j6o3Zd6O_W3e1XkiCkDvtwLnzFUCEfGMJs6HEHt9bC12EC9vO6Zw0WpqQA9BIcNUkitJtMJW1q5HSWCtENrP2VqGvvTlJpDBw",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:12000/applications",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "12000",
+							"path": [
+								"applications"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AIOrchestrator-GetUser Files",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBRWtHLS1TdU1TSDE3QVlYMjJNSk5ZWU5TNElMend2b1k0YTlUWFp1dUpJIn0.eyJleHAiOjE3NTg4MTUzNDMsImlhdCI6MTc1ODgxMTc0MywiYXV0aF90aW1lIjoxNzU4Nzk5MzY3LCJqdGkiOiJvbnJ0YWM6NTJiNWRhNzYtZWViOS0zNGYyLTk0MWItZjRhODgzMmVjNDMzIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9qdWdhYWkiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiZWY2YTQzZmYtMmY4ZC00NjZlLTkyZmUtMDRhMmM1ZTBlYWI2IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGV2dWkiLCJzaWQiOiIwOTJlZDcyMC1kM2RmLTQ5N2MtODFiNC1kMjM4YmZkYjNiMDIiLCJhY3IiOiIwIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly9sb2NhbGhvc3Q6MTIwMDAiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwiZGVmYXVsdC1yb2xlcy1qdWdhYWkiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJqdWdhIGFpIiwicHJlZmVycmVkX3VzZXJuYW1lIjoianVnYWFpIiwiZ2l2ZW5fbmFtZSI6Imp1Z2EiLCJmYW1pbHlfbmFtZSI6ImFpIiwiZW1haWwiOiJqdWdhYWlAanVnYWFpLmNvbSJ9.jZuicUdOSY4XkZ1MnG_OIWuqgT300uD1WON26nbZUq4aSn15Li4Fgop-ES95c-8QOV89g1YW_1eEG2mf3ylPMPfKgLWIEh8MPCwVf295TibgoDp1LwHndmvqAjaw4MEHZdfoDEmC27jCyqolmobdE60kUso4wvj6BlNt2Jn2txHZWCPrpSgy5S5er0G3L4FAmhkyRTLHDD09jbZ1mILmSoLpgolUR-ra8nuQwCORXw3sxySh74kaDAIoY3cGEopoCHarLp_3txSyhthDi2ttndOMOwl0ml6iP19xaPIPIeqTMFtAY5i5nBZpMrDQTPm5T5u0V2bnvwA3suA-BMURYQ",
+								"type": "text"
+							},
+							{
+								"key": "app-identifier",
+								"value": "test-app",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:12000/files/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "12000",
+							"path": [
+								"files",
+								"user"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "AIOrchestrator-Delete User File",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBRWtHLS1TdU1TSDE3QVlYMjJNSk5ZWU5TNElMend2b1k0YTlUWFp1dUpJIn0.eyJleHAiOjE3NTg4MTUzNDMsImlhdCI6MTc1ODgxMTc0MywiYXV0aF90aW1lIjoxNzU4Nzk5MzY3LCJqdGkiOiJvbnJ0YWM6NTJiNWRhNzYtZWViOS0zNGYyLTk0MWItZjRhODgzMmVjNDMzIiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9qdWdhYWkiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiZWY2YTQzZmYtMmY4ZC00NjZlLTkyZmUtMDRhMmM1ZTBlYWI2IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiZGV2dWkiLCJzaWQiOiIwOTJlZDcyMC1kM2RmLTQ5N2MtODFiNC1kMjM4YmZkYjNiMDIiLCJhY3IiOiIwIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly9sb2NhbGhvc3Q6MTIwMDAiXSwicmVhbG1fYWNjZXNzIjp7InJvbGVzIjpbIm9mZmxpbmVfYWNjZXNzIiwiZGVmYXVsdC1yb2xlcy1qdWdhYWkiLCJ1bWFfYXV0aG9yaXphdGlvbiJdfSwicmVzb3VyY2VfYWNjZXNzIjp7ImFjY291bnQiOnsicm9sZXMiOlsibWFuYWdlLWFjY291bnQiLCJtYW5hZ2UtYWNjb3VudC1saW5rcyIsInZpZXctcHJvZmlsZSJdfX0sInNjb3BlIjoib3BlbmlkIHByb2ZpbGUgZW1haWwiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJqdWdhIGFpIiwicHJlZmVycmVkX3VzZXJuYW1lIjoianVnYWFpIiwiZ2l2ZW5fbmFtZSI6Imp1Z2EiLCJmYW1pbHlfbmFtZSI6ImFpIiwiZW1haWwiOiJqdWdhYWlAanVnYWFpLmNvbSJ9.jZuicUdOSY4XkZ1MnG_OIWuqgT300uD1WON26nbZUq4aSn15Li4Fgop-ES95c-8QOV89g1YW_1eEG2mf3ylPMPfKgLWIEh8MPCwVf295TibgoDp1LwHndmvqAjaw4MEHZdfoDEmC27jCyqolmobdE60kUso4wvj6BlNt2Jn2txHZWCPrpSgy5S5er0G3L4FAmhkyRTLHDD09jbZ1mILmSoLpgolUR-ra8nuQwCORXw3sxySh74kaDAIoY3cGEopoCHarLp_3txSyhthDi2ttndOMOwl0ml6iP19xaPIPIeqTMFtAY5i5nBZpMrDQTPm5T5u0V2bnvwA3suA-BMURYQ",
+								"type": "text"
+							},
+							{
+								"key": "app-identifier",
+								"value": "test-app",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:12000/files/user",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "12000",
+							"path": [
+								"files",
+								"user"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "LLM",
+			"item": [
+				{
+					"name": "Vllm Embedding Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearere fake",
+								"type": "text",
+								"disabled": true
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"input\": \"The food was delicious and the waiter...\",\r\n    \"model\": \"Qwen/Qwen3-Embedding-4B\",\r\n    \"encoding_format\": \"float\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "localhost:10001/v1/embeddings",
+							"host": [
+								"localhost"
+							],
+							"port": "10001",
+							"path": [
+								"v1",
+								"embeddings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LiteLLM - Get Models",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "http://api.jandarma.site/v1/models",
+							"protocol": "http",
+							"host": [
+								"api",
+								"jandarma",
+								"site"
+							],
+							"path": [
+								"v1",
+								"models"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LiteLLM-Completions",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-litellm-api-key",
+								"value": "sk-4321",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"model\": \"hosted_vllm/Qwen/Qwen3-14B-AWQ\",\r\n    \"enable_thinking\":\"False\",\r\n    \"messages\": [\r\n        {\r\n            \"role\": \"user\",\r\n            \"content\": \"merhaba!\"\r\n        }\r\n    ]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://127.0.0.1:4000/v1/chat/completions",
+							"protocol": "http",
+							"host": [
+								"127",
+								"0",
+								"0",
+								"1"
+							],
+							"port": "4000",
+							"path": [
+								"v1",
+								"chat",
+								"completions"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "LiteLLM-Embedding-Request",
+					"protocolProfileBehavior": {
+						"disabledSystemHeaders": {
+							"user-agent": true,
+							"accept": true,
+							"accept-encoding": true,
+							"connection": true
+						}
+					},
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer sk-4321",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"input\" : [\"olup olmadığı kontrol edilir. Yapılan inceleme ve araştırma sonucunda, silah ruhsatı düzenlenmesine engel suç kaydı bulunanların durumu, buna ilişkin mahkeme veya savcılık kararları istenerek değerlendirilir. Silah ruhsat talebinde bulunanlar hakkında gerekli inceleme ve araştırma yapıldıktan sonra, talep yetkili mülki amirliğin onayına sunulur. Silah ruhsatı düzenlenirken, ruhsat türüne göre Silah Bulundurma Ruhsatı Tebligat Formu (EK- 1), Silah Taşıma Ruhsatı Tebligat Formu (EK-2/A) veya Güvenlik Korucuları Silah Taşıma Ruhsatı Tebligat Formu (EK-2/B) ya da Yivsiz Tüfek Ruhsatnamesi Tebligat Formu (EK-3) Sayfa 2 / 91 başvuru sahiplerine imzalattırılır ve merkezi kayıt sistemine kayıt edilir. Bu formlar tebligat yerine geçerlidir. Ruhsat süresinin bitiminden otuz gün önce, ruhsat sahibi kısa mesaj servisi ile bilgilendirilir. Türk vatandaşlığından izinle çıkarak mavi kart (çıkma belgesi) sahibi olanlara; silah ruhsat başvurusu yaptığı tarihten geriye dönük bir yıl içerisinde, kesintisiz en az altı ay Ülkemizde bulunmaları şartı ile silah ruhsatı düzenlenebilir. Yurt dışında yaşayan vatandaşlardan, Ülkemizdeki adreslerinde müracaat tarihi itibarıyla geriye dönük altı aydan az ikamet ettikleri tespit edilenlere silah ruhsatı düzenlenmez, bu kişilerin mevcut silah ruhsatları süresi sonunda yenilenmez ve yeni silah ruhsat talepleri kabul edilmez. Silah ruhsat başvuruları, başvuru tarihinden itibaren en geç otuz gün içinde sonuçlandırılır, sonuçlandırılamaması durumunda konu hakkında başvuru sahibine aynı süre içerisinde bilgilendirme yapılır. Silah ruhsat başvurusunda bulunan kişilerin işlemleri, ikamet yeri esasına göre sorumluluk bölgesi dikkate alınarak genel kolluk birimlerince yapılır. Silah kaydı ruhsatı girilmesi/kaldırılması, silahın emanete alınması/iade edilmesi, mülkiyetinin kamuya,\"],\r\n    \"model\": \"qwen3-embed-8b\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://api.jandarma.site/v1/embeddings",
+							"protocol": "http",
+							"host": [
+								"api",
+								"jandarma",
+								"site"
+							],
+							"path": [
+								"v1",
+								"embeddings"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "ModelGroupInfo",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:4000/model_group/info",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "4000",
+							"path": [
+								"model_group",
+								"info"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "AdminBackend",
+			"item": [
+				{
+					"name": "Upload User File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "application-id",
+								"value": "1",
+								"type": "text"
+							},
+							{
+								"key": "file-type",
+								"value": "1",
+								"type": "text"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBRWtHLS1TdU1TSDE3QVlYMjJNSk5ZWU5TNElMend2b1k0YTlUWFp1dUpJIn0.eyJleHAiOjE3NTgyMDU2MTEsImlhdCI6MTc1ODIwMjAxMSwiYXV0aF90aW1lIjoxNzU4MTk2OTc3LCJqdGkiOiJvbnJ0YWM6NDVmNzM3OTYtOTQ0NC0zZDUyLTc3ZWYtZWRhMjU5YTAxZjA2IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9qdWdhYWkiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiZWY2YTQzZmYtMmY4ZC00NjZlLTkyZmUtMDRhMmM1ZTBlYWI2IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tYmFja2VuZC1hcGkiLCJzaWQiOiJkMGI4OTEzMC1jNWFjLTRmMDEtYTIzMy0zNzE3ZDI1ODczNzgiLCJhY3IiOiIwIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly9sb2NhbGhvc3Q6NTAwNiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsib2ZmbGluZV9hY2Nlc3MiLCJkZWZhdWx0LXJvbGVzLWp1Z2FhaSIsInVtYV9hdXRob3JpemF0aW9uIl19LCJyZXNvdXJjZV9hY2Nlc3MiOnsiYWNjb3VudCI6eyJyb2xlcyI6WyJtYW5hZ2UtYWNjb3VudCIsIm1hbmFnZS1hY2NvdW50LWxpbmtzIiwidmlldy1wcm9maWxlIl19fSwic2NvcGUiOiJwcm9maWxlIGVtYWlsIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlLCJuYW1lIjoianVnYSBhaSIsInByZWZlcnJlZF91c2VybmFtZSI6Imp1Z2FhaSIsImdpdmVuX25hbWUiOiJqdWdhIiwiZmFtaWx5X25hbWUiOiJhaSIsImVtYWlsIjoianVnYWFpQGp1Z2FhaS5jb20ifQ.fMZBlCcCbzLYr4jHc9qVlmmhiev8SAFuVuALOHbEedVn6JQ0RLOSqDEl36TkBgAaD5euvV2blHBDKVx-Retr-w4VIz0487m1T-nXKnQy_ESV2fgaa8POsPadSEWP8wtdM0vW-3mW-bLdnH8cjLzlw8eIjD4t4GoFGEd_z6xBvJvehOdNBIdru6E964w4XashAWeMZorvWkBVMOswtmCh9vLT-sdoxESmeF9IEsWkYGcaPnARSS1SmrQnaqpfcXXKhdIQ1WGKJFLixBvttwGizLhccq5lXmoEHFg5VA1TBktT50ofn4OS_lfWwvU06QIQsKQs8NXEOaHBfGJ9nLSSHg",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "files[0].File",
+									"type": "file",
+									"src": "/D:/Projects/JugaDev/AI/data_sources/SILAH-ISLEMLERI-GENELGESI(1)-1.pdf"
+								},
+								{
+									"key": "files[0].Title",
+									"value": "SILAH-ISLEMLERI-GENELGESI",
+									"type": "text"
+								},
+								{
+									"key": "files[0].Description",
+									"value": "Silah İşlemleri Genelgesi",
+									"type": "text"
+								},
+								{
+									"key": "files[1].File",
+									"type": "file",
+									"src": "/Users/furkan/Downloads/demo.docx",
+									"disabled": true
+								},
+								{
+									"key": "files[1].Title",
+									"value": "Demo docx",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "files[1].Description",
+									"value": "10 MB",
+									"type": "text",
+									"disabled": true
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5006/files/storage",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5006",
+							"path": [
+								"files",
+								"storage"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Application File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer eyJhbGciOiJSUzI1NiIsInR5cCIgOiAiSldUIiwia2lkIiA6ICJBRWtHLS1TdU1TSDE3QVlYMjJNSk5ZWU5TNElMend2b1k0YTlUWFp1dUpJIn0.eyJleHAiOjE3NTk4Njc5MDIsImlhdCI6MTc1OTg2NDMwMiwiYXV0aF90aW1lIjoxNzU5ODY0MzAyLCJqdGkiOiJvbnJ0YWM6MTRlNGRhNDYtNmRlZC1jN2I0LWJkMzQtNDMzZWY3Y2UyOGQ3IiwiaXNzIjoiaHR0cDovL2xvY2FsaG9zdDo4MDgwL3JlYWxtcy9qdWdhYWkiLCJhdWQiOiJhY2NvdW50Iiwic3ViIjoiZWY2YTQzZmYtMmY4ZC00NjZlLTkyZmUtMDRhMmM1ZTBlYWI2IiwidHlwIjoiQmVhcmVyIiwiYXpwIjoiYWRtaW4tYmFja2VuZC1hcGkiLCJzaWQiOiI2MjI4NjAxOS1kM2QyLTQ1NDEtYjUyZi0yNWRmMzY4NjdiNzIiLCJhY3IiOiIxIiwiYWxsb3dlZC1vcmlnaW5zIjpbImh0dHA6Ly9sb2NhbGhvc3Q6NTAwNiJdLCJyZWFsbV9hY2Nlc3MiOnsicm9sZXMiOlsianVnYWFpLWFkbWluIiwic2VhcmNoLWFwcC13aXRoLXVzZXItZmlsZSIsInRlc3QtYXBwIiwib2ZmbGluZV9hY2Nlc3MiLCJkZWZhdWx0LXJvbGVzLWp1Z2FhaSIsInVtYV9hdXRob3JpemF0aW9uIiwicG0iLCJzb2NpYWwtZmFjaWxpdHkiXX0sInJlc291cmNlX2FjY2VzcyI6eyJhY2NvdW50Ijp7InJvbGVzIjpbIm1hbmFnZS1hY2NvdW50IiwibWFuYWdlLWFjY291bnQtbGlua3MiLCJ2aWV3LXByb2ZpbGUiXX19LCJzY29wZSI6InByb2ZpbGUgZW1haWwiLCJlbWFpbF92ZXJpZmllZCI6ZmFsc2UsIm5hbWUiOiJqdWdhIGFpIiwicHJlZmVycmVkX3VzZXJuYW1lIjoianVnYWFpIiwiZ2l2ZW5fbmFtZSI6Imp1Z2EiLCJmYW1pbHlfbmFtZSI6ImFpIiwiZW1haWwiOiJqdWdhYWlAanVnYWFpLmNvbSJ9.Y6rzD0Vdj9mL7h5SkauvZ-ibEkx0r3aSgQ6uId_rPupgniqq1t8uL-S1FLi-_eicRlx4SV1mZgw3JTYGUZZk0pd2_UDC4iFwGmrCzRaPcGD53rz4q1qVRTp57FUcv4mQosStufhp03bPYFmrDYZRZT7njXpQxoA4zQqT_NxiQCFcNsRh4BmDcUPv_45rkjs5Vrz4KQs20TlbnHRjoTQFnTRldn8eBitESwld6empsVMKOaeBreG_Eqd0hqRnrrOpXf3O9YXHwEl27VimL6Ri0CFEVf6M31QJFDifEBLB1rPRkttNpgjLbo1wn12RLPBWCrLLYmuJLHZ8rGZwENTPgA",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "files[0].File",
+									"type": "file",
+									"src": "/C:/Users/meskai/Desktop/AI Yol Haritası.pdf"
+								},
+								{
+									"key": "files[0].Title",
+									"value": "SILAH-ISLEMLERI-GENELGESI",
+									"type": "text"
+								},
+								{
+									"key": "files[0].Description",
+									"value": "Silah İşlemleri Genelgesi",
+									"type": "text"
+								},
+								{
+									"key": "files[1].File",
+									"type": "file",
+									"src": "/Users/furkan/Downloads/demo.docx",
+									"disabled": true
+								},
+								{
+									"key": "files[1].Title",
+									"value": "Demo docx",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "files[1].Description",
+									"value": "10 MB",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "applicationIdentifier",
+									"value": "test-app",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:5006/files/application/storage",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5006",
+							"path": [
+								"files",
+								"application",
+								"storage"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DataManager",
+			"item": [
+				{
+					"name": "DataManager Job Request",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": ""
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

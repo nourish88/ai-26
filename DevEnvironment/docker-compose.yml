@@ -1,0 +1,176 @@
+#version: '3.4'
+
+name: juga
+include:
+  #- compose.collector.yaml
+  #- compose.tracing.yaml
+  - compose.langfuse.yaml
+
+services:
+  # admin-backend:
+    # ... (services remain the same)
+
+  # tool-gateway:
+    # ... (services remain the same)
+
+  # datamanager:
+    # ... (services remain the same)
+
+  # aiorchestrator:
+    # ... (services remain the same)
+    
+  postgres:
+    image: postgres:15
+    restart: always
+    volumes:
+      - ./data/postgres/multiple-databases.sh:/docker-entrypoint-initdb.d/multiple-databases.sh
+      # CORRECT: Using a named volume to avoid permission issues
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_MULTIPLE_DATABASES: ${POSTGRES_DB_NAMES}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    ports:
+      - "127.0.0.1:5532:5432"
+    networks:
+      - dev
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.3.0
+    restart: always
+    environment:
+      KC_DB: postgres
+      KC_DB_USERNAME: ${POSTGRES_USER}
+      KC_DB_PASSWORD: ${POSTGRES_PASSWORD}
+      KC_DB_SCHEMA: public
+      KC_DB_URL: jdbc:postgresql://postgres:5432/${KEYCLOAK_POSTGRES_DB}
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_USER_NAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_PASSWORD}
+    ports:
+      - "127.0.0.1:8080:8080"
+    command:
+      - 'start-dev'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - dev
+
+  redis:
+    image: redis:7
+    restart: always
+    command: >
+      --requirepass ${REDIS_AUTH:-myredissecret}
+    ports:
+      - "127.0.0.1:6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 10s
+      retries: 10
+    networks:
+      - dev
+
+  elasticsearch:
+    image: elasticsearch:8.19.5
+    build:
+      context: elk/elasticsearch/
+    restart: always
+    volumes:
+      - ./elk/elasticsearch/config/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    ports:
+      - "127.0.0.1:9200:9200"
+      - "127.0.0.1:9300:9300"
+    environment:
+      node.name: elasticsearch
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      discovery.type: single-node
+    networks:
+      - dev
+
+  kibana:
+    image: kibana:8.19.5
+    build:
+      context: elk/kibana/
+    restart: always
+    environment:
+      - I18N_LOCALE=en-US
+    volumes:
+      - ./elk/kibana/config/:/usr/share/kibana/config:ro
+    ports:
+      - "127.0.0.1:5601:5601"
+    networks:
+      - dev
+    depends_on:
+      - elasticsearch
+    external_links:
+      - elasticsearch:juga-elasticsearch
+
+  minio:
+    image: minio/minio
+    restart: always
+    entrypoint: sh
+    command: -c 'mkdir -p /data/langfuse && mkdir -p /data/juga && minio server --address ":9000" --console-address ":9001" /data'
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER:-minio}
+      MINIO_ROOT_PASSWORD: ${MINIO_SECRET:-miniosecret}
+    ports:
+      - "127.0.0.1:8090:9000"
+      - "127.0.0.1:8091:9001"
+    volumes:
+      - ./data/minio:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+      start_period: 1s
+    networks:
+      - dev
+  
+  litellm:
+    image: ghcr.io/berriai/litellm:main-stable
+    environment:
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:-sk-4321}
+      LITELLM_SALT_KEY: ${LITELLM_SALT_KEY}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${LITELLM_POSTGRES_DB}
+      STORE_MODEL_IN_DB: "True"
+      PORT: 4000
+    ports:
+      - "127.0.0.1:4000:4000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./data/litellm/config.yaml:/app/config.yaml
+    command: [ "--config", "/app/config.yaml", "--port", "4000", "--num_workers", "1" ]
+    networks:
+      - dev
+
+  mongo:
+    image: mongo
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: example
+    ports:
+      - "127.0.0.1:27017:27017"
+    volumes:
+      # === THIS IS THE FIX ===
+      # Using a named volume to avoid permission issues
+      - mongo_data:/data/db
+    networks:
+      - dev
+  
+networks:
+  dev:
+    name: juga-network
+
+# Top-level volumes definition for Docker to manage
+volumes:
+  postgres_data:
+  mongo_data:

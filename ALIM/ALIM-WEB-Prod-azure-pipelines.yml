@@ -1,0 +1,216 @@
+# Docker
+# Build a Docker image
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+  branches:
+    include:
+    - refs/heads/master
+  paths:
+    exclude:
+    - ALIM-WEB-Test-azure-pipelines.yml
+    - pipelines/web/web-test.yaml
+  # paths:
+  #   exclude:
+
+resources:
+- repo: self
+
+stages:
+- stage: SonarQube
+  displayName: SonarQube Statik Kod Analizi
+  jobs:
+  - job: Analysis
+    displayName: Analize hazırlık ve kod analiz işlemleri
+    pool:
+      name: SonarQube_Yzl
+    steps:
+    - task: SonarQubePrepare@7
+      inputs:
+        SonarQube: 'SonarQube-Registry'
+        scannerMode: 'cli'
+        configMode: 'manual'
+        cliProjectKey: 'ALIM-WEB-Prod'
+        cliProjectName: 'ALIM'
+        cliSources: '.'
+        extraProperties: |
+          # Additional properties that will be passed to the scanner, 
+          # Put one key=value per line, example:
+          # sonar.exclusions=**/*.bin
+          sonar.ceritificationCheck=false
+    - task: SonarQubeAnalyze@7
+      inputs:
+        jdkversion: 'JAVA_HOME_21_X64'
+- stage: Build
+  displayName: ALIM-WEB-Prod-CI-yaml
+  jobs:
+  - job: Build
+    displayName: ALIM-WEB-Prod Build Agent Pool Selection
+    pool:
+      name: Adalar
+    steps:
+    - task: Docker@2
+      displayName: Build WEB Prod image
+      inputs:
+        containerRegistry: 'Nexus Docker Registry'
+        repository: 'alim/web'
+        command: 'build'
+        Dockerfile: 'Dockerfile'
+        buildContext: '**'
+        tags: |
+          $(Build.SourceVersion)-$(Build.BuildId)
+          latest
+    - task: Docker@2
+      displayName: Push WEB Prod image
+      inputs:
+        containerRegistry: 'Nexus Docker Registry'
+        repository: 'alim/web'
+        command: 'push'
+        tags: |
+          $(Build.SourceVersion)-$(Build.BuildId)
+          latest
+    # Deployment dosyasının olduğu gibi değişmesi için replacetokens-CopyFiles-PublishBuildArtifacts adımlarını ekleyip Bash scripti güncelledim.
+    - task: replacetokens@6
+      displayName: Replace tokens in **/web.yaml
+      inputs:
+        root: 'pipelines/web'
+        sources: '**/web.yaml'
+    - task: CopyFiles@2
+      displayName: Copy Files to $(Build.ArtifactStagingDirectory)
+      inputs:
+        SourceFolder: 'pipelines/web'
+        Contents: '**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Artifact WEB
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'WEB'
+        publishLocation: 'Container'
+# Uygulama gerçek anlamda kullanılmaya başlayana kadar bu stage kapalı kalacak. Sonra tekrar açacağım. Işın-05/09/2025        
+# - stage: Scan
+#   displayName: ALIM-WEB-Test OWASP Açıklık Taraması
+#   jobs:
+#   - job: Scan
+#     displayName: WEB ZAP Scan
+#     pool:
+#       name: 'OwaspTest'
+#     steps:
+#     - task: CmdLine@2
+#       displayName: Command Line Script (ZAP Scan)
+#       inputs:
+#         script: |
+#           ReleaseId=$(Release.ReleaseId)
+#           xmlfile=owasp-scan-report-alim-test-$ReleaseId.xml
+#           mdfile=owasp-scan-report-alim-test-$ReleaseId.md
+#           endpoint=https://alim-test.jandarma.gov.tr
+#           scantype=zap-full-scan.py
+#           cd /zap/wrk
+#           docker run -v $(pwd):/zap/wrk/:rw -t kutuphane.jandarma.gov.tr/azuredevops/zap2docker-stable:2.11.1 $scantype -t $endpoint -x $xmlfile -w $mdfile
+#           RESULT=`cat $mdfile | grep High | awk '{print $4}'`
+#           echo $RESULT
+#           if [ "$RESULT" == "0" ] ;
+#             then
+#               echo "aciklik yok";
+#               exit 0;
+#             else
+#               echo "aciklik var";
+#               exit 1;
+#           fi
+#   - job: waitForValidation1
+#     displayName: ZAP Taraması sonrası onay işlemi
+#     dependsOn: Scan
+#     pool:
+#       name: 'server'
+#     #timeoutInMinutes: 2
+#     steps:
+#     - task: ManualValidation@0
+#       timeoutInMinutes: 10 
+#       inputs:
+#         notifyUsers: |
+#           KHKRHTFS01
+#           KHKRHTFS02
+#           vturkoglu@jandarma.gov.tr
+#           nuriaktas@jandarma.gov.tr
+#         instructions: 'ZAP taraması tamamlandı. Prod cluster deploy aşamasına geçmek istiyor musunuz?'
+#         onTimeout: 'reject'
+#   - job: waitForValidation2
+#     displayName: Kamunet-K8s-Prod ortamına yükleme öncesi onay işlemi
+#     dependsOn: waitForValidation1
+#     pool:
+#       name: 'server'
+#     steps:
+#     - task: ManualValidation@0
+#       timeoutInMinutes: 10 
+#       inputs:
+#         notifyUsers: |
+#           KHKRHTFS01
+#           KHKRHTFS02
+#           vturkoglu@jandarma.gov.tr
+#           nuriaktas@jandarma.gov.tr
+#           uuzun@jandarma.gov.tr
+#           erguntarhan@jandarma.gov.tr
+#           serhatcelik@jandarma.gov.tr
+#           abdulhamitcicek@jandarma.gov.tr
+#         instructions: 'Prod cluster deploy işlemini onaylıyor musunuz?'
+#         onTimeout: 'reject'
+- stage: Prod_Deploy
+  displayName: ALIM-WEB-Prod-CD-yaml
+  jobs:
+  - job: Release
+    displayName: WEB Kamunet-K8s-Prod
+    pool:
+      name: Goksu-ArgoCD
+    steps:
+    # DownloadBuildArtifacts adımında Adalar havuzundan seçilen agent içindeki pipelines/web klasörü deploy aşamasında Goksu-ArgoCD havuzundan seçilen agent içindeki dizine kopyalanır.
+    - task: DownloadBuildArtifacts@0
+      displayName: Build agent içindeki dosyaları yeni pool içindeki agent içine kopyala
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'WEB'
+        downloadPath: '$(Build.ArtifactStagingDirectory)'
+        ###downloadPath: '$(System.ArtifactsDirectory)'
+        cleanDestinationFolder: true
+    - task: KubernetesManifest@0
+      displayName: 'Deploy WEB Kamunet-K8s-Prod'
+      inputs:
+        action: 'deploy'
+        kubernetesServiceConnection: 'Kamunet-K8s-Prod'
+        namespace: 'alim'
+        manifests: '$(System.ArtifactsDirectory)/WEB/web.yaml'
+    - task: Bash@3
+      displayName: 'Bash Script-(Build sonrasında güncellenen deployment dosyasının yeni hali kopyalanır.)'
+      inputs:
+        targetType: 'inline'
+        script: |
+          set -x
+          #env GIT_TERMINAL_PROMPT=1
+
+          #REPO_URL : Azure DevOps da argocd.git projesinin sag ustteki clone butonuna basildiginda SSH sekmesinde yazan adres
+          REPO_URL="ssh://tfs.jandarma.gov.tr:1903/tfs/ArgoCD/argocd.git/_git/argocd.git"
+
+          git config --global user.email "khargtfs01@example.com"
+          git config --global user.name "argocd-git-user"
+          NAMESPACE=alim
+          
+          git clone "$REPO_URL" /tmp/temp_repo
+
+          cp $(Build.ArtifactStagingDirectory)/WEB/web.yaml /tmp/temp_repo/apps/kamunet/applications/$NAMESPACE/prod/deployment
+          cd /tmp/temp_repo/apps/kamunet/applications/$NAMESPACE/prod/deployment
+          #cat web.yaml
+         
+          # D İ K K A T !...
+          # Altta kapattığım Semih Astsubayın yazdığı kod ile deployment dosyasındaki imaj tag değişiyordu sadece. 
+          # O zaman replacetokens-CopyFiles-PublishBuildArtifacts-DownloadBuildArtifacts task adımlarını yapmaya gerek kalmıyor.
+          # Deployment dosyası olduğu gibi değişsin diye burayı kapatıp üstteki kodu yazdım. ISIN-13/08/2025
+
+          # cd /tmp/temp_repo/apps/kamunet/applications/$NAMESPACE/prod/deployment
+          # REPLACE_TAG=$(cat web.yaml | grep image: | cut -d':' -f 3)
+          # sed -i "s/$REPLACE_TAG/$BUILD_SOURCEVERSION-$BUILD_BUILDID/g" ./web.yaml
+          
+          git add .
+          git commit -m "$NAMESPACE/prod/deployment/web.yaml dosyası güncellendi"
+          git push
+
+          rm -rf /tmp/temp_repo

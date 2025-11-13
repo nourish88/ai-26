@@ -1,0 +1,149 @@
+# Docker
+# Build a Docker image
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
+
+trigger:
+  branches:
+    include:
+    - refs/heads/master
+  paths:
+    exclude:
+    - ALIM-WEB-Prod-azure-pipelines.yml
+    - pipelines/web/web.yaml
+  # paths:
+  #   exclude:
+
+resources:
+- repo: self
+
+stages:
+- stage: SonarQube
+  displayName: SonarQube Statik Kod Analizi
+  jobs:
+  - job: Analysis
+    displayName: Analize hazırlık ve kod analiz işlemleri
+    pool:
+      name: SonarQube_Yzl
+    steps:
+    - task: SonarQubePrepare@7
+      inputs:
+        SonarQube: 'SonarQube-Registry'
+        scannerMode: 'cli'
+        configMode: 'manual'
+        cliProjectKey: 'ALIM-WEB-Test'
+        cliProjectName: 'ALIM'
+        cliSources: '.'
+        extraProperties: |
+          # Additional properties that will be passed to the scanner, 
+          # Put one key=value per line, example:
+          # sonar.exclusions=**/*.bin
+          sonar.ceritificationCheck=false
+    - task: SonarQubeAnalyze@7
+      inputs:
+        jdkversion: 'JAVA_HOME_21_X64'
+- stage: Build
+  displayName: ALIM-WEB-Test-CI-yaml
+  jobs:
+  - job: Build
+    displayName: ALIM-WEB-Test Build Agent Pool Selection
+    pool:
+      name: Adalar
+    steps:
+    - task: Docker@2
+      displayName: Build WEB Test image
+      inputs:
+        containerRegistry: 'Nexus Docker Registry'
+        repository: 'alim/web-test'
+        command: 'build'
+        Dockerfile: 'Dockerfile'
+        buildContext: '**'
+        tags: |
+          $(Build.SourceVersion)-$(Build.BuildId)
+          latest
+    - task: Docker@2
+      displayName: Push WEB Test image
+      inputs:
+        containerRegistry: 'Nexus Docker Registry'
+        repository: 'alim/web-test'
+        command: 'push'
+        tags: |
+          $(Build.SourceVersion)-$(Build.BuildId)
+          latest
+    # Deployment dosyasının olduğu gibi değişmesi için replacetokens-CopyFiles-PublishBuildArtifacts adımlarını ekleyip Bash scripti güncelledim.
+    - task: replacetokens@6
+      displayName: Replace tokens in **/web-test.yaml
+      inputs:
+        root: 'pipelines/web'
+        sources: '**/web-test.yaml'
+    - task: CopyFiles@2
+      displayName: Copy Files to $(Build.ArtifactStagingDirectory)
+      inputs:
+        SourceFolder: 'pipelines/web'
+        Contents: '**'
+        TargetFolder: '$(Build.ArtifactStagingDirectory)'
+    - task: PublishBuildArtifacts@1
+      displayName: Publish Artifact WEB-TEST
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'WEB-TEST'
+        publishLocation: 'Container'
+- stage: Test_Deploy
+  displayName: ALIM-WEB-Test-CD-yaml
+  jobs:
+  - job: Release
+    displayName: WEB Kamunet-K8s-Test
+    pool:
+      name: Goksu-ArgoCD
+    steps:
+    # DownloadBuildArtifacts adımında Adalar havuzundan seçilen agent içindeki pipelines/web klasörü deploy aşamasında Goksu-ArgoCD havuzundan seçilen agent içindeki dizine kopyalanır.
+    - task: DownloadBuildArtifacts@0
+      displayName: Build agent içindeki dosyaları yeni pool içindeki agent içine kopyala
+      inputs:
+        buildType: 'current'
+        downloadType: 'single'
+        artifactName: 'WEB-TEST'
+        downloadPath: '$(Build.ArtifactStagingDirectory)'
+        ###downloadPath: '$(System.ArtifactsDirectory)'
+        cleanDestinationFolder: true
+    - task: KubernetesManifest@0
+      displayName: 'Deploy WEB Kamunet-K8s-Test'
+      inputs:
+        action: 'deploy'
+        kubernetesServiceConnection: 'Kamunet-K8s-Test'
+        namespace: 'alim'
+        manifests: '$(System.ArtifactsDirectory)/WEB-TEST/web-test.yaml'
+    - task: Bash@3
+      displayName: 'Bash Script-(Build sonrasında güncellenen deployment dosyasının yeni hali kopyalanır.)'
+      inputs:
+        targetType: 'inline'
+        script: |
+          set -x
+          #env GIT_TERMINAL_PROMPT=1
+
+          #REPO_URL : Azure DevOps da argocd.git projesinin sag ustteki clone butonuna basildiginda SSH sekmesinde yazan adres
+          REPO_URL="ssh://tfs.jandarma.gov.tr:1903/tfs/ArgoCD/argocd.git/_git/argocd.git"
+
+          git config --global user.email "khargtfs01@example.com"
+          git config --global user.name "argocd-git-user"
+          NAMESPACE=alim
+          
+          git clone "$REPO_URL" /tmp/temp_repo
+
+          cp $(Build.ArtifactStagingDirectory)/WEB-TEST/web-test.yaml /tmp/temp_repo/apps/kamunet/applications/$NAMESPACE/test/deployment
+          cd /tmp/temp_repo/apps/kamunet/applications/$NAMESPACE/test/deployment
+          #cat web-test.yaml
+         
+          # D İ K K A T !...
+          # Altta kapattığım Semih Astsubayın yazdığı kod ile deployment dosyasındaki imaj tag değişiyordu sadece. 
+          # O zaman replacetokens-CopyFiles-PublishBuildArtifacts-DownloadBuildArtifacts task adımlarını yapmaya gerek kalmıyor.
+          # Deployment dosyası olduğu gibi değişsin diye burayı kapatıp üstteki kodu yazdım. ISIN-13/08/2025
+
+          # cd /tmp/temp_repo/apps/kamunet/applications/$NAMESPACE/test/deployment
+          # REPLACE_TAG=$(cat web-test.yaml | grep image: | cut -d':' -f 3)
+          # sed -i "s/$REPLACE_TAG/$BUILD_SOURCEVERSION-$BUILD_BUILDID/g" ./web-test.yaml
+          
+          git add .
+          git commit -m "$NAMESPACE/test/deployment/web-test.yaml dosyası güncellendi"
+          git push
+
+          rm -rf /tmp/temp_repo
