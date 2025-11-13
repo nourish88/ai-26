@@ -1,12 +1,12 @@
-FROM node:20-alpine AS deps
+# Stage 1 - install dependencies
+FROM node:20-bookworm AS deps
 WORKDIR /app
-
-RUN apk add --no-cache libc6-compat
 
 COPY package.json package-lock.json ./
 RUN npm ci
 
-FROM node:20-alpine AS builder
+# Stage 2 - build application
+FROM node:20-bookworm AS builder
 WORKDIR /app
 
 ENV NODE_ENV=production
@@ -15,7 +15,8 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build
 
-FROM node:20-alpine
+# Stage 3 - production runtime
+FROM node:20-bookworm
 WORKDIR /app
 
 ENV NODE_ENV=production
