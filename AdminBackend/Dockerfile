@@ -2,6 +2,8 @@
 WORKDIR /source
 
 COPY AdminBackend/. ./
+ENV DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER=0
+ENV NUGET_CERTIFICATE_ENFORCEMENT=none
 RUN dotnet restore
 RUN dotnet publish -c Release -o /app --no-restore
 
