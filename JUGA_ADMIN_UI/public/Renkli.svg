@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="katman_1" data-name="katman 1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 1080 1080">
+  <defs>
+    <style>
+      .cls-1 {
+        fill: url(#Adsız_degrade_3044-3);
+      }
+
+      .cls-2 {
+        fill: url(#Adsız_degrade_3044-2);
+      }
+
+      .cls-3 {
+        fill: url(#Adsız_degrade_3044-5);
+      }
+
+      .cls-4 {
+        fill: url(#Adsız_degrade_3044);
+      }
+
+      .cls-5 {
+        fill: url(#Adsız_degrade_3044-4);
+      }
+    </style>
+    <linearGradient id="Adsız_degrade_3044" data-name="Adsız degrade 3044" x1="489.47" y1="306.15" x2="669.52" y2="741.1" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#1d00df"/>
+      <stop offset=".58" stop-color="#000"/>
+      <stop offset="1" stop-color="#9f0035"/>
+    </linearGradient>
+    <linearGradient id="Adsız_degrade_3044-2" data-name="Adsız degrade 3044" x1="424.87" y1="332.89" x2="604.92" y2="767.84" xlink:href="#Adsız_degrade_3044"/>
+    <linearGradient id="Adsız_degrade_3044-3" data-name="Adsız degrade 3044" x1="579.37" y1="268.93" x2="759.42" y2="703.89" xlink:href="#Adsız_degrade_3044"/>
+    <linearGradient id="Adsız_degrade_3044-4" data-name="Adsız degrade 3044" x1="280.89" y1="392.48" x2="460.94" y2="827.44" xlink:href="#Adsız_degrade_3044"/>
+    <linearGradient id="Adsız_degrade_3044-5" data-name="Adsız degrade 3044" x1="385.74" y1="349.08" x2="565.79" y2="784.04" xlink:href="#Adsız_degrade_3044"/>
+  </defs>
+  <path class="cls-4" d="M633.76,744.68c61.26,0,110.92-49.66,110.92-110.92v-133.45l-248.52,244.37h137.6Z"/>
+  <path class="cls-2" d="M414.13,516.97l77.58-80.08c7.04-1.83,43.77,28.66,46.26,25.78v-127.35h-9.5l-193.15,193.11v34.15h237.41l-79.28,82.17-44.56-27.87v127.79h9.06l227.75-227.71h-271.57Z"/>
+  <path class="cls-1" d="M633.76,335.32h-65.38v151.24h176.3v-40.33c0-61.26-49.66-110.92-110.92-110.92Z"/>
+  <path class="cls-5" d="M335.32,633.76c0,51.65,35.36,94.93,83.16,107.27v-148.04h-83.16v40.77Z"/>
+  <path class="cls-3" d="M446.24,335.32c-61.26,0-110.92,49.66-110.92,110.92v44.26l153.68-155.18h-42.77Z"/>
+</svg>
