@@ -10,14 +10,17 @@ ENV PIP_DEFAULT_TIMEOUT=100 \
     PIP_NO_CACHE_DIR=1
 
 WORKDIR $APP_HOME
-COPY requirements.txt .
+COPY DataManager/requirements.txt .
+COPY certs/corporate-root-ca.crt /usr/local/share/ca-certificates/corporate-root-ca.crt
 
 RUN set -ex \
     && addgroup --system --gid 1001 $APP_USER \
     && adduser --system --uid 1001 --gid 1001 --no-create-home $APP_USER \
     && apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
     && apt-get upgrade -y \
-    && pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt \
+    && update-ca-certificates \
+    && pip install -r requirements.txt \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
@@ -30,8 +33,8 @@ ENV PYTHONUNBUFFERED=1
 
 WORKDIR $APP_HOME
 
-COPY server.py .
-COPY ./src src
+COPY DataManager/server.py .
+COPY DataManager/src src
 RUN chown -R $APP_USER:$APP_USER $APP_HOME
 
 CMD ["python", "server.py"]

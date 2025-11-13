@@ -1,9 +1,13 @@
 ﻿FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /source
 
+COPY certs/corporate-root-ca.crt /usr/local/share/ca-certificates/corporate-root-ca.crt
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
 COPY AdminBackend/. ./
-ENV DOTNET_SYSTEM_NET_HTTP_USESOCKETSHTTPHANDLER=0
-ENV NUGET_CERTIFICATE_ENFORCEMENT=none
 RUN dotnet restore
 RUN dotnet publish -c Release -o /app --no-restore
 

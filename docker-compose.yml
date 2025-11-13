@@ -6,7 +6,8 @@ include:
 services:
   admin-backend:
     build:
-      context: ./AdminBackend
+      context: .
+      dockerfile: AdminBackend/Dockerfile
     env_file:
       - dev.env
     environment:
@@ -39,7 +40,8 @@ services:
 
   tool-gateway:
     build:
-      context: ./ToolGateway
+      context: .
+      dockerfile: ToolGateway/Dockerfile
     env_file:
       - dev.env
     environment:
@@ -64,7 +66,8 @@ services:
 
   data-manager:
     build:
-      context: ./DataManager
+      context: .
+      dockerfile: DataManager/Dockerfile
     env_file:
       - dev.env
     environment:
@@ -101,7 +104,8 @@ services:
 
   ai-orchestrator:
     build:
-      context: ./AIOrchestrator
+      context: .
+      dockerfile: AIOrchestrator/Dockerfile
     env_file:
       - dev.env
     environment:
@@ -140,7 +144,8 @@ services:
 
   alim:
     build:
-      context: ./ALIM
+      context: .
+      dockerfile: ALIM/Dockerfile
     env_file:
       - dev.env
     environment:
@@ -166,7 +171,8 @@ services:
 
   juga-admin-ui:
     build:
-      context: ./JUGA_ADMIN_UI
+      context: .
+      dockerfile: JUGA_ADMIN_UI/Dockerfile
     env_file:
       - dev.env
     environment:
