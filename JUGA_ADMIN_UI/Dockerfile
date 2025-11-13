@@ -3,6 +3,7 @@ FROM node:20-bookworm AS deps
 WORKDIR /app
 
 COPY package.json package-lock.json ./
+RUN npm config set strict-ssl false
 RUN npm ci
 
 # Stage 2 - build application

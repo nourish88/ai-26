@@ -4,6 +4,7 @@ WORKDIR /app
 
 # Install deps with relaxed peer checks for React 19 + vaul@0.9.9
 COPY package*.json ./
+RUN npm config set strict-ssl false
 RUN npm ci --legacy-peer-deps
 
 # Stage 2 - build

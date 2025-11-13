@@ -17,7 +17,7 @@ RUN set -ex \
     && adduser --system --uid 1001 --gid 1001 --no-create-home $APP_USER \
     && apt-get update \
     && apt-get upgrade -y \
-    && pip install -r requirements.txt \
+    && pip install --trusted-host pypi.org --trusted-host files.pythonhosted.org -r requirements.txt \
     && apt-get autoremove -y \
     && apt-get clean -y \
     && rm -rf /var/lib/apt/lists/*
