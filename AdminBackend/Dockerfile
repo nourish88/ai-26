@@ -2,6 +2,8 @@
 WORKDIR /source
 
 COPY certs/corporate-root-ca.crt /usr/local/share/ca-certificates/corporate-root-ca.crt
+COPY certs/corporate-intermediate-ca.crt /usr/local/share/ca-certificates/corporate-intermediate-ca.crt
+COPY certs/corporate-subca.crt /usr/local/share/ca-certificates/corporate-subca.crt
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates \
     && update-ca-certificates \
