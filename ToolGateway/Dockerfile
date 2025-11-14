@@ -10,7 +10,7 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 COPY ToolGateway ./ToolGateway
-WORKDIR /source/ToolGateway
+WORKDIR /source/ToolGateway/ToolGateway
 RUN dotnet restore
 RUN dotnet publish -c Release -o /app --no-restore
 
