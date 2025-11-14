@@ -9,7 +9,8 @@ RUN apt-get update \
     && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-COPY AdminBackend/. ./
+COPY AdminBackend ./AdminBackend
+WORKDIR /source/AdminBackend
 RUN dotnet restore
 RUN dotnet publish -c Release -o /app --no-restore
 
