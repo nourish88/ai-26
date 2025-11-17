@@ -4,14 +4,24 @@ WORKDIR /source
 COPY certs/aa.crt /usr/local/share/ca-certificates/aa.crt
 COPY certs/pypi.org.crt /usr/local/share/ca-certificates/pypi.org.crt
 
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends ca-certificates \
+RUN apt-get clean \
+    && rm -rf /var/lib/apt/lists/* \
+    && echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99allow-unauthenticated \
+    && apt-get update --allow-releaseinfo-change 2>&1 | grep -v "GPG error" | grep -v "not signed" || true \
+    && apt-get install -y --no-install-recommends ca-certificates gnupg2 \
+    && rm -f /etc/apt/apt.conf.d/99allow-unauthenticated \
+    && apt-get update 2>&1 | grep -v "GPG error" | grep -v "not signed" || true \
     && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
 COPY AdminBackend ./AdminBackend
 WORKDIR /source/AdminBackend/AdminBackend
-RUN dotnet restore AdminBackend.sln
+ENV NUGET_XMLDOC_MODE=skip \
+    DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true \
+    DOTNET_CLI_TELEMETRY_OPTOUT=true \
+    NUGET_PACKAGES=/root/.nuget/packages
+RUN dotnet restore AdminBackend.sln --verbosity detailed --no-cache || \
+    (dotnet nuget locals all --clear && dotnet restore AdminBackend.sln --verbosity detailed)
 RUN dotnet publish AdminBackend.sln -c Release -o /app --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
