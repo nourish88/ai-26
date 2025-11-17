@@ -1,6 +1,7 @@
 # Stage 1 - install deps
 FROM node:20-bookworm AS deps
 WORKDIR /app
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
 
 # Install deps with relaxed peer checks for React 19 + vaul@0.9.9
 COPY certs/aa.crt /usr/local/share/ca-certificates/aa.crt

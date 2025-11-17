@@ -1,6 +1,7 @@
 # Stage 1 - install dependencies
 FROM node:20-bookworm AS deps
 WORKDIR /app
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
 
 COPY certs/aa.crt /usr/local/share/ca-certificates/aa.crt
 COPY certs/pypi.org.crt /usr/local/share/ca-certificates/pypi.org.crt

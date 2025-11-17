@@ -11,8 +11,8 @@ RUN apt-get update \
 
 COPY AdminBackend ./AdminBackend
 WORKDIR /source/AdminBackend/AdminBackend
-RUN dotnet restore
-RUN dotnet publish -c Release -o /app --no-restore
+RUN dotnet restore AdminBackend.sln
+RUN dotnet publish AdminBackend.sln -c Release -o /app --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app

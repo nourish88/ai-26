@@ -10,8 +10,8 @@ RUN apt-get update \
 
 COPY ToolGateway ./ToolGateway
 WORKDIR /source/ToolGateway/ToolGateway
-RUN dotnet restore
-RUN dotnet publish -c Release -o /app --no-restore
+RUN dotnet restore ToolGateway.sln
+RUN dotnet publish ToolGateway.sln -c Release -o /app --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
