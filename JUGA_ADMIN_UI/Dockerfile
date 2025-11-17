@@ -1,6 +1,7 @@
 # Stage 1 - install dependencies
 FROM node:20-bookworm AS deps
 WORKDIR /app
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
 
 COPY certs/corporate-root-ca.crt /usr/local/share/ca-certificates/corporate-root-ca.crt
 COPY certs/corporate-intermediate-ca.crt /usr/local/share/ca-certificates/corporate-intermediate-ca.crt
@@ -17,6 +18,7 @@ FROM node:20-bookworm AS builder
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
 
 COPY certs/corporate-root-ca.crt /usr/local/share/ca-certificates/corporate-root-ca.crt
 COPY certs/corporate-intermediate-ca.crt /usr/local/share/ca-certificates/corporate-intermediate-ca.crt
