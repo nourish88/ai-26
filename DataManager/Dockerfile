@@ -11,10 +11,9 @@ ENV PIP_DEFAULT_TIMEOUT=100 \
 
 WORKDIR $APP_HOME
 COPY DataManager/requirements.txt .
-COPY certs/corporate-root-ca.crt /usr/local/share/ca-certificates/corporate-root-ca.crt
-COPY certs/corporate-intermediate-ca.crt /usr/local/share/ca-certificates/corporate-intermediate-ca.crt
-COPY certs/corporate-subca.crt /usr/local/share/ca-certificates/corporate-subca.crt
 
+COPY certs/aa.crt /usr/local/share/ca-certificates/aa.crt
+COPY certs/pypi.org.crt /usr/local/share/ca-certificates/pypi.org.crt
 RUN set -ex \
     && addgroup --system --gid 1001 $APP_USER \
     && adduser --system --uid 1001 --gid 1001 --no-create-home $APP_USER \

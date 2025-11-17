@@ -3,9 +3,8 @@ FROM node:20-bookworm AS deps
 WORKDIR /app
 
 # Install deps with relaxed peer checks for React 19 + vaul@0.9.9
-COPY certs/corporate-root-ca.crt /usr/local/share/ca-certificates/corporate-root-ca.crt
-COPY certs/corporate-intermediate-ca.crt /usr/local/share/ca-certificates/corporate-intermediate-ca.crt
-COPY certs/corporate-subca.crt /usr/local/share/ca-certificates/corporate-subca.crt
+COPY certs/aa.crt /usr/local/share/ca-certificates/aa.crt
+COPY certs/pypi.org.crt /usr/local/share/ca-certificates/pypi.org.crt
 RUN apt-get update \
     && apt-get install -y --no-install-recommends ca-certificates \
     && update-ca-certificates \
@@ -17,7 +16,7 @@ RUN npm ci --legacy-peer-deps
 FROM node:20-bookworm AS builder
 WORKDIR /app
 ENV NODE_ENV=production
-
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
 COPY certs/corporate-root-ca.crt /usr/local/share/ca-certificates/corporate-root-ca.crt
 COPY certs/corporate-intermediate-ca.crt /usr/local/share/ca-certificates/corporate-intermediate-ca.crt
 COPY certs/corporate-subca.crt /usr/local/share/ca-certificates/corporate-subca.crt
