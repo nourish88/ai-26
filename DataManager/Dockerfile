@@ -23,7 +23,7 @@ RUN set -ex \
     && apt-get update --allow-releaseinfo-change 2>&1 | grep -v "GPG error" | grep -v "not signed" || true \
     && apt-get install -y --no-install-recommends ca-certificates gnupg2 \
     && rm -f /etc/apt/apt.conf.d/99allow-unauthenticated \
-    && apt-get update \
+    && apt-get update 2>&1 | grep -v "GPG error" | grep -v "not signed" || true \
     && apt-get upgrade -y \
     && update-ca-certificates \
     && pip install -r requirements.txt \
