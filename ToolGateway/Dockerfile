@@ -27,10 +27,10 @@ ENV NUGET_XMLDOC_MODE=skip \
 RUN mkdir -p /root/.nuget/temp /root/.nuget/packages \
     && rm -rf /tmp/* /tmp/.* 2>/dev/null || true \
     && dotnet nuget locals all --clear \
-    && dotnet restore ToolGateway.sln --verbosity minimal --no-cache || \
+    && dotnet restore ToolGateway.sln --verbosity quiet --no-cache --disable-parallel || \
     (rm -rf /tmp/* /tmp/.* /root/.nuget/temp/* 2>/dev/null || true \
      && dotnet nuget locals all --clear \
-     && dotnet restore ToolGateway.sln --verbosity minimal) \
+     && dotnet restore ToolGateway.sln --verbosity quiet --disable-parallel) \
     && rm -rf /tmp/* /tmp/.* /root/.nuget/temp/* 2>/dev/null || true
 RUN dotnet publish ToolGateway.sln -c Release -o /app --no-restore
 

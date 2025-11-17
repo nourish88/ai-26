@@ -3,11 +3,11 @@ FROM node:20-bookworm AS deps
 WORKDIR /app
 ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt \
     NPM_CONFIG_FETCH_TIMEOUT=600000 \
-    NPM_CONFIG_FETCH_RETRIES=10 \
-    NPM_CONFIG_FETCH_RETRY_FACTOR=3 \
-    NPM_CONFIG_FETCH_RETRY_MINTIMEOUT=10000 \
-    NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT=60000 \
-    NPM_CONFIG_LOGLEVEL=verbose
+    NPM_CONFIG_FETCH_RETRIES=15 \
+    NPM_CONFIG_FETCH_RETRY_FACTOR=4 \
+    NPM_CONFIG_FETCH_RETRY_MINTIMEOUT=20000 \
+    NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT=120000 \
+    NPM_CONFIG_LOGLEVEL=warn
 
 COPY certs/aa.crt /usr/local/share/ca-certificates/aa.crt
 COPY certs/pypi.org.crt /usr/local/share/ca-certificates/pypi.org.crt
@@ -21,8 +21,9 @@ RUN apt-get clean \
     && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 COPY JUGA_ADMIN_UI/package.json JUGA_ADMIN_UI/package-lock.json ./
-RUN npm ci --prefer-offline --no-audit --verbose --loglevel=verbose || \
-    (npm cache clean --force && npm ci --prefer-offline --no-audit --verbose --loglevel=verbose)
+RUN npm cache clean --force \
+    && npm ci --no-audit --loglevel=warn || \
+    (npm cache clean --force && npm ci --no-audit --loglevel=warn)
 
 # Stage 2 - build application
 FROM node:20-bookworm AS builder
