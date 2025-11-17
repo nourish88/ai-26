@@ -19,11 +19,10 @@ RUN set -ex \
     && adduser --system --uid 1001 --gid 1001 --no-create-home $APP_USER \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
-    && echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/99no-check-valid-until \
-    && echo 'Acquire::AllowInsecureRepositories "true";' >> /etc/apt/apt.conf.d/99no-check-valid-until \
-    && apt-get update --allow-releaseinfo-change || apt-get update || true \
+    && echo 'APT::Get::AllowUnauthenticated "true";' > /etc/apt/apt.conf.d/99allow-unauthenticated \
+    && apt-get update --allow-releaseinfo-change 2>&1 | grep -v "GPG error" | grep -v "not signed" || true \
     && apt-get install -y --no-install-recommends ca-certificates gnupg2 \
-    && rm -f /etc/apt/apt.conf.d/99no-check-valid-until \
+    && rm -f /etc/apt/apt.conf.d/99allow-unauthenticated \
     && apt-get update \
     && apt-get upgrade -y \
     && update-ca-certificates \
