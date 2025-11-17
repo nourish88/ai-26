@@ -18,9 +18,18 @@ WORKDIR /source/ToolGateway/ToolGateway
 ENV NUGET_XMLDOC_MODE=skip \
     DOTNET_SKIP_FIRST_TIME_EXPERIENCE=true \
     DOTNET_CLI_TELEMETRY_OPTOUT=true \
-    NUGET_PACKAGES=/root/.nuget/packages
-RUN dotnet restore ToolGateway.sln --verbosity detailed --no-cache || \
-    (dotnet nuget locals all --clear && dotnet restore ToolGateway.sln --verbosity detailed)
+    NUGET_PACKAGES=/root/.nuget/packages \
+    TMPDIR=/root/.nuget/temp \
+    TEMP=/root/.nuget/temp \
+    TMP=/root/.nuget/temp
+RUN mkdir -p /root/.nuget/temp /root/.nuget/packages \
+    && rm -rf /tmp/* /tmp/.* 2>/dev/null || true \
+    && dotnet nuget locals all --clear \
+    && dotnet restore ToolGateway.sln --verbosity minimal --no-cache || \
+    (rm -rf /tmp/* /tmp/.* /root/.nuget/temp/* 2>/dev/null || true \
+     && dotnet nuget locals all --clear \
+     && dotnet restore ToolGateway.sln --verbosity minimal) \
+    && rm -rf /tmp/* /tmp/.* /root/.nuget/temp/* 2>/dev/null || true
 RUN dotnet publish ToolGateway.sln -c Release -o /app --no-restore
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
