@@ -1,7 +1,10 @@
 # Stage 1 - install dependencies
 FROM node:20-bookworm AS deps
 WORKDIR /app
-ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt
+ENV NODE_EXTRA_CA_CERTS=/etc/ssl/certs/ca-certificates.crt \
+    NPM_CONFIG_FETCH_TIMEOUT=300000 \
+    NPM_CONFIG_FETCH_RETRIES=5 \
+    NPM_CONFIG_FETCH_RETRY_FACTOR=2
 
 COPY certs/aa.crt /usr/local/share/ca-certificates/aa.crt
 COPY certs/pypi.org.crt /usr/local/share/ca-certificates/pypi.org.crt
@@ -10,7 +13,7 @@ RUN apt-get update \
     && update-ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 COPY JUGA_ADMIN_UI/package.json JUGA_ADMIN_UI/package-lock.json ./
-RUN npm ci
+RUN npm ci --prefer-offline --no-audit || (npm cache clean --force && npm ci)
 
 # Stage 2 - build application
 FROM node:20-bookworm AS builder
