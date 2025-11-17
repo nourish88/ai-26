@@ -3,6 +3,8 @@ WORKDIR /source
 
 COPY certs/aa.crt /usr/local/share/ca-certificates/aa.crt
 COPY certs/pypi.org.crt /usr/local/share/ca-certificates/pypi.org.crt
+COPY certs/nuget.org.crt /usr/local/share/ca-certificates/nuget.org.crt
+COPY certs/api.nuget.org.crt /usr/local/share/ca-certificates/api.nuget.org.crt
 
 RUN apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
